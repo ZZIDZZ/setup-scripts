@@ -1,0 +1,11 @@
+---
+- import_playbook: create_user_gamer.yml
+- import_playbook: install_docker.yml
+- import_playbook: install_php_fpm.yml
+- import_playbook: install_apache.yml
+- import_playbook: install_nginx.yml
+- import_playbook: setup_mysql.yml
+- import_playbook: install_composer.yml
+- import_playbook: setup_proxy.yml
+- import_playbook: setup_project.yml
+- import_playbook: setup_ssl.yml

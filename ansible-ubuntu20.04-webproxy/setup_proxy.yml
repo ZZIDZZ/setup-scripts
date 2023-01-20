@@ -1,0 +1,75 @@
+---
+- hosts: all
+  become: true
+  vars:
+    domain: "{{ansible_host}}"
+    user: gamer
+    php_version: 8.0
+  tasks:
+    - name: Include vars
+      ansible.builtin.include_vars:
+        file: vars/vars.yaml
+        name: vars
+
+    - name: Install mod_fastcgi
+      shell: |
+        wget https://mirrors.edge.kernel.org/ubuntu/pool/multiverse/liba/libapache-mod-fastcgi/libapache2-mod-fastcgi_2.4.7~0910052141-1.2_amd64.deb
+        dpkg -i libapache2-mod-fastcgi_2.4.7~0910052141-1.2_amd64.deb
+        rm libapache2-mod-fastcgi_2.4.7~0910052141-1.2_amd64.deb
+
+    - name: Enable mod_actions and backup fastcgi conf
+      shell: |
+        a2enmod actions
+        a2enmod rewrite
+      ignore_errors: true
+    
+    - name: Setup Fastcgi conf
+      template:
+        src: fastcgi.conf.j2
+        dest: /etc/apache2/mods-enabled/fastcgi.conf
+    
+    - name: Check apachectl
+      shell: apachectl -t
+      
+    - name: Restart apache2
+      service: name=apache2 state=restarted
+
+    - name: "remove directory /home/{{user}}/{{domain}}"
+      shell: "rm -Rf /home/{{user}}/{{domain}}"
+
+    - name: "Github Clone"
+      shell: "git clone https://github.com/ZZIDZZ/point-of-sale-api /home/{{user}}/{{domain}}"
+      become_user: "{{user}}"
+
+    - name: set 777 folder storage
+      shell: "chmod 777 -R  /home/{{user}}/{{domain}}/storage"
+      become_user: "{{user}}"
+
+    - name: Apache2 config
+      template:
+        src: apache.conf.j2
+        dest: /etc/apache2/sites-available/{{domain}}.conf
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Enable site apache2
+      command: "a2ensite {{domain}}"
+    
+    - name: Nginx config
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/{{domain}}
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Enable site Nginx
+      command: ln -s /etc/nginx/sites-available/{{domain}} /etc/nginx/sites-enabled/{{domain}}
+      ignore_errors: true
+
+
+      
+
+    
+

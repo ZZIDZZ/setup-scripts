@@ -1,0 +1,23 @@
+- hosts: all
+  become: yes
+  vars:
+    domain: "{{ansible_host}}"
+    user: gamer
+  tasks:
+    - name: Include vars
+      ansible.builtin.include_vars:
+        file: vars/vars.yaml
+        name: vars
+    - name: copy env
+      template:
+        src: ./project.env.j2
+        dest: /home/{{user}}/{{domain}}/.env
+      become_user: "{{user}}"
+
+    - name: Install packages
+      shell: chdir=/home/{{user}}/{{domain}} composer install
+      become_user: "{{user}}"
+
+    - name: Migrate db
+      command: chdir=/home/{{user}}/{{domain}} php artisan migrate:fresh
+      become_user: "{{user}}"

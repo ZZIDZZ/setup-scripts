@@ -1,0 +1,11 @@
+<VirtualHost *:8080>
+    ServerName {{domain}}
+    DocumentRoot /home/{{user}}/{{domain}}/public
+    <Directory /home/{{user}}/{{domain}}/public>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+        Require all granted
+    </Directory>
+</VirtualHost>

@@ -1,0 +1,20 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Include vars
+      ansible.builtin.include_vars:
+        file: vars/vars.yaml
+        name: vars
+        
+    - name: copy Docker Compose
+      template:
+        src: ./mysql.yml.j2
+        dest: /root/mysql.yml
+        owner: root
+        group: root
+
+    # use files parameter to use multiple docker-compose.yml files
+    - name: deploy Docker Compose stack
+      become_user: root
+      command: docker-compose -f /root/mysql.yml up -d

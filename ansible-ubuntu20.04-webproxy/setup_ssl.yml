@@ -1,0 +1,15 @@
+- hosts: all
+  become: yes
+  vars:
+    domain: "{{ansible_host}}"
+    user: gamer
+  tasks:
+    - name: apt update
+      apt: update_cache=yes
+      #command: sudo apt update
+    - name: Install Certbot
+      apt: name=certbot
+    - name: Install Certbot Nginx module
+      apt: name=python3-certbot-nginx
+    - name: Certbot Nginx setup
+      shell: certbot --nginx -d {{domain}} --redirect --agree-tos -m zzidzz100@gmail.com --non-interactive
