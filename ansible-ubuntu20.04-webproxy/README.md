@@ -37,5 +37,5 @@ You should change few things before using this script:
 This script also expects you to have ssh key already installed on your server
 
 ### Example:
-``` ansible-playbook --ask-vault-pass --ask-become-pass -u root -i ./inventory ```   
+``` ansible-playbook --ask-vault-pass --ask-become-pass -u root -i ./inventory ./setup_all.yml ```   
 note: vars are included in script, so relative dir must be okay
