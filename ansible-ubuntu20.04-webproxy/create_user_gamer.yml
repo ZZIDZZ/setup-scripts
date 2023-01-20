@@ -8,33 +8,33 @@
     - name: test debug
       ansible.builtin.debug:
         msg:
-        - "{{vars.vars.gamer_password|string}}"
-        - "{{vars.vars.gamer_password|string |password_hash('sha512')}}"
-    - name: Create gamer user
+        - "{{vars.vars.user_password|string}}"
+        - "{{vars.vars.user_password|string |password_hash('sha512')}}"
+    - name: Create user user
       user:
-        name: gamer
-        password: "{{vars.vars.gamer_password|string|password_hash('sha512')}}"
+        name: user
+        password: "{{vars.vars.user_password|string|password_hash('sha512')}}"
         shell: /bin/bash
         update_password: on_create
-      register: gamer
-    - name: sudo gamer
-      command: "usermod -aG sudo gamer"
-    - name: sudo sdadsgamer
-      shell: "echo {{vars.vars.gamer_password|string}} > /root/yest"
-    - name: sudo sdadsgamersad
+      register: user
+    - name: sudo user
+      command: "usermod -aG sudo user"
+    - name: sudo sdadsuser
+      shell: "echo {{vars.vars.user_password|string}} > /root/yest"
+    - name: sudo sdadsusersad
       shell: "echo asdfasdas >> /root/yest"
-#    - name: Force gamer to change password
-#      shell: chage -d 0 gamer
-#      when: gamer.changed
+#    - name: Force user to change password
+#      shell: chage -d 0 user
+#      when: user.changed
     - name: Creates .ssh directory
       file:
-        path: /home/gamer/.ssh
+        path: /home/user/.ssh
         state: directory
     - name: Copying ssh key
-      command: "cp /root/.ssh/authorized_keys /home/gamer/.ssh/authorized_keys"
+      command: "cp /root/.ssh/authorized_keys /home/user/.ssh/authorized_keys"
     - name: setup ssh key permission
       file:
-        dest: /home/gamer/.ssh/authorized_keys
-        owner: gamer
-        group: gamer
+        dest: /home/user/.ssh/authorized_keys
+        owner: user
+        group: user
         mode: "600"

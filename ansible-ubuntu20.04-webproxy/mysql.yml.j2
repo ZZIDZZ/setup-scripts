@@ -6,8 +6,8 @@ services:
     container_name: mysql
     environment:
       MYSQL_DATABASE: pos-api
-      MYSQL_USER: gamer
-      MYSQL_PASSWORD: {{vars.vars.mysql_gamer_password}}
+      MYSQL_USER: user
+      MYSQL_PASSWORD: {{vars.vars.mysql_user_password}}
       MYSQL_ROOT_PASSWORD: {{vars.vars.mysql_root_password}}
     ports:
       - "3306:3306"

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-mysql_root_password=ganteng2020
-user_name=gamer
-user_password=ganteng2020
+mysql_root_password=password
+user_name=user
+user_password=password
 
 sudo useradd -m -s /usr/bin/bash -p $(openssl passwd -1 $user_password) $user_name || true & 
 wait  

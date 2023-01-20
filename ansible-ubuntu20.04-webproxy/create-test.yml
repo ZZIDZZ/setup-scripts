@@ -8,14 +8,14 @@
     - name: tsest debugg
       ansible.builtin.debug:
         msg:
-        - "{{ vars['vars']['gamer_password'] }}"
+        - "{{ vars['vars']['user_password'] }}"
     - name: test debug
       ansible.builtin.debug:
         msg:
         - "{{ vars }}"
-        - "{{ vars['gamer_password'] }}"
-        - "{{ vars['vars']['gamer_password']  | password_hash('sha512') }}"
+        - "{{ vars['user_password'] }}"
+        - "{{ vars['vars']['user_password']  | password_hash('sha512') }}"
     - name: test debugg
       ansible.builtin.debug:
         msg:
-        - "{{ gamer_password }}"
+        - "{{ user_password }}"

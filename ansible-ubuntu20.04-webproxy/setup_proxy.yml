@@ -3,7 +3,7 @@
   become: true
   vars:
     domain: "{{ansible_host}}"
-    user: gamer
+    user: user
     php_version: 8.0
   tasks:
     - name: Include vars

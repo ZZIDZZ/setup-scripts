@@ -2,7 +2,7 @@
   become: yes
   vars:
     domain: "{{ansible_host}}"
-    user: gamer
+    user: user
   tasks:
     - name: apt update
       apt: update_cache=yes
