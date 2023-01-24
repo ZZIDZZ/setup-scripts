@@ -1,0 +1,72 @@
+---
+- hosts: prom
+  become: true
+  vars:
+    prometheus_version: "2.1.0"
+    prometheus_target:
+      target_1:
+        key: prometheus-target-1
+        value: 159.223.48.195
+      target_2:
+        key: prometheus-target-2
+        value: 128.199.243.157
+
+  tasks:
+    - name: install dependency
+      apt:
+        name
+    - name: Create a prometheus user
+      user:
+        name: prometheus
+        shell: /usr/bin/false       # Defaults to /bin/bash
+        system: yes             # Defaults to no
+        createhome: no       # Defaults to yes
+
+    - name: Create dir /tmp/prometheus/
+      file:
+        path: /tmp/prometheus
+        state: directory
+
+    - name: wget
+      shell: |
+        wget https://github.com/prometheus/prometheus/releases/download/v{{prometheus_version}}/prometheus-{{prometheus_version}}.linux-amd64.tar.gz
+      args:
+        chdir: "/tmp/prometheus" 
+    
+    - name: install node exporter
+      shell: |
+        tar -xf prometheus-{{prometheus_version}}.linux-amd64.tar.gz 
+        mv prometheus-{{prometheus_version}}.linux-amd64/prometheus prometheus-{{prometheus_version}}.linux-amd64/prometheus/promtool /usr/local/bin
+        mkdir /etc/prometheus /var/lib/prometheus
+        mv prometheus-{{prometheus_version}}.linux-amd64/consoles prometheus-{{prometheus_version}}.linux-amd64/console_libraries /etc/prometheus
+        rm -r prometheus-{{prometheus_version}}.linux-amd64*
+      args:
+        chdir: "/tmp/prometheus" 
+    
+    - name: append hosts
+      shell: 'echo "{{item.value}} {{item.key}}" >> /etc/hosts'
+      loop: "{{ lookup('dict', prometheus_target) }}"
+
+    - name: chown
+      shell: |
+        chown -R prometheus: /etc/prometheus /var/lib/prometheus
+      args:
+        chdir: "/tmp/prometheus" 
+    
+    - name: Setup prometheus yml
+      template:
+        src: prometheus.yml.j2
+        dest: /etc/prometheus/prometheus.yml
+
+    - name: Setup systemd node exporter
+      template:
+        src: prometheus.service.j2
+        dest: /etc/systemd/system/prometheus.service
+    
+    - name: Start systemd prometheus
+      systemd:
+        service: prometheus
+        daemon_reload: true
+        enabled: true
+        state: started
+    

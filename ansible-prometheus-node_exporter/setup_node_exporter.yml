@@ -1,0 +1,43 @@
+---
+- hosts: all
+  become: true
+  vars:
+    node_exporter_version: "0.15.2"
+  tasks:
+    - name: Create a node_exporter user
+      user:
+        name: node_exporter
+        shell: /usr/bin/false       # Defaults to /bin/bash
+        system: yes             # Defaults to no
+        createhome: no       # Defaults to yes
+    - name: Create dir /tmp/node_exporter/
+      file:
+        path: /tmp/node_exporter
+        state: directory
+
+    - name: wget
+      shell: |
+        wget https://github.com/prometheus/node_exporter/releases/download/v{{node_exporter_version}}/node_exporter-{{node_exporter_version}}.linux-amd64.tar.gz
+      args:
+        chdir: "/tmp/node_exporter" 
+    
+    - name: install node exporter
+      shell: |
+        tar -xf node_exporter-{{node_exporter_version}}.linux-amd64.tar.gz 
+        sudo mv node_exporter-{{node_exporter_version}}.linux-amd64/node_exporter /usr/local/bin
+        rm -r node_exporter-{{node_exporter_version}}.linux-amd64*
+      args:
+        chdir: "/tmp/node_exporter" 
+
+    - name: Setup systemd node exporter
+      template:
+        src: node_exporter.service.j2
+        dest: /etc/systemd/system/node_exporter.service
+    
+    - name: Start systemd node_exporter
+      systemd:
+        service: node_exporter
+        daemon_reload: true
+        enabled: true
+        state: started
+    
