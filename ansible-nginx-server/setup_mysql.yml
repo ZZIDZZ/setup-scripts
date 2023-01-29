@@ -1,0 +1,65 @@
+- hosts: all
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Include vars
+      ansible.builtin.include_vars:
+        file: vars/vars.yaml
+        name: vars
+
+    - name: Install dependencies
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - python3-pymysql
+          - mysql-server
+          - mysql-client 
+          - build-essential
+
+    - name: start and enable mysql service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    # MySQL Configuration
+    - name: Sets the root password
+      mysql_user:
+        name: root
+        login_user: root
+        login_password: "{{vars.vars.mysql_gamer_password}}"
+        password: "{{vars.vars.mysql_gamer_password}}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: root
+        login_password: "{{vars.vars.mysql_gamer_password}}"
+      ignore_errors: true
+    - name: Removes the MySQL test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{vars.vars.mysql_gamer_password}}"
+    
+    - name: creating mysql user
+      mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: gamer
+        login_user: root
+        login_password: "{{vars.vars.mysql_gamer_password}}"
+        password: "{{vars.vars.mysql_gamer_password}}"
+        priv: '*.*:ALL'
+        host: '%'
+        state: present
+
+    - name: Restart mysql
+      service:
+        name: mysql
+        state: restarted
