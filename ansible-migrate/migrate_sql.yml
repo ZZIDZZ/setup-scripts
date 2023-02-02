@@ -1,0 +1,64 @@
+- hosts: all
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Include vars
+      ansible.builtin.include_vars:
+        file: vars/vars.yaml
+        name: vars
+        
+    - name: copy dumps
+      copy:
+        src: ./dumps/
+        dest: /root/dumps
+
+    - name: Find files create
+      find:
+       path: "/root/dumps"
+       pattern: "*.create"
+      register: dumps_create
+    
+    - name: Find files restore
+      find:
+       path: "/root/dumps"
+       pattern: "*.sql"
+      register: dumps_restore
+    
+    # - name: test debug
+    #   ansible.builtin.debug:
+    #     msg:
+    #     - "{{item.path}}"
+    #   with_items: "{{dumps.files}}" 
+
+    # - name: login to gamer mysql
+    #   mysql_user:
+    #     name: gamer
+    #     login_user: gamer
+    #     login_password: "{{vars.vars.mysql_gamer_password}}"
+    #     password: "{{vars.vars.mysql_gamer_password}}"
+    #     login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Restore create databases
+      mysql_db:
+        state: import
+        name: all
+        target: "{{item.path}}"
+        login_user: gamer
+        login_password: "{{vars.vars.mysql_gamer_password}}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_host: 127.0.0.1
+      with_items: "{{dumps_create.files}}"
+
+    - name: Restore databases dumps
+      mysql_db:
+        state: import
+        name: "{{ (item.path.split('.')[0]).split('/')[-1] }}"
+        target: "{{item.path}}"
+        login_user: gamer
+        login_password: "{{vars.vars.mysql_gamer_password}}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_host: 127.0.0.1
+      with_items: "{{dumps_restore.files}}"
+    
+    
+

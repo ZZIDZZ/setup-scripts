@@ -1,0 +1,39 @@
+- hosts: all
+  become: yes
+  gather_facts: false
+  vars:
+    user: gamer
+    php_version: 7.4
+  tasks:
+    - name: Include vars
+      ansible.builtin.include_vars:
+        file: vars/vars.yaml
+        name: vars
+    
+    - name: Include vhosts
+      ansible.builtin.include_vars: vhosts.yml
+
+    - name: test debug
+      ansible.builtin.debug:
+        msg:
+        - "{{item.key}}"
+        - "{{item.value.domain}}"
+        - "{{item.value.root_dir}}"
+      with_items: "{{ vhosts | dict2items }}"
+    
+    - name: bulk vhost config
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-enabled/{{item.value.domain}}
+        owner: root
+        group: root
+        mode: "0644"
+      with_items: "{{ vhosts | dict2items }}"
+
+    # - name: bulk vhost config
+    #   template:
+    #     msg:
+    #     - "{{item.key}}"
+    #     - "{{item.value.domain}}"
+    #     - "{{item.value.root_dir}}"
+    #   with_items: "{{ vhosts | dict2items }}"
